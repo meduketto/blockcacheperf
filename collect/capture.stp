@@ -1,0 +1,46 @@
+#
+#
+#
+
+global trackedfiles
+
+probe begin
+{
+    printf("Capture Begin\n")
+}
+
+probe end
+{
+    printf("Capture End\n")
+}
+
+probe generic.fop.open
+{
+    fullname = task_dentry_path(task_current(), file->f_path->dentry, file->f_path->mnt)
+    temp = substr(fullname, 0, strlen(@1))
+    if (temp == @1) {
+        printf ("of inode:%d name:%s\n", ino, fullname)
+        trackedfiles[ino, devname] = fullname
+    }
+}
+
+probe vfs.read.return
+{
+    if ([ino, devname] in trackedfiles) {
+        printf ("rf inode:%d pos:%d size:%d\n", ino, $file->f_pos, bytes_read)
+    }
+}
+
+probe vfs.write.return
+{
+    if ([ino, devname] in trackedfiles) {
+        printf ("wf inode:%d pos:%d size:%d\n", ino, $file->f_pos, bytes_written)
+    }
+}
+
+probe ioblock.request
+{
+    if ([ino, devname] in trackedfiles) {
+        printf ("%s inode:%d sector:%d size:%d\n", rw ? "wb" : "rb", ino, sector, size)
+    }
+}
