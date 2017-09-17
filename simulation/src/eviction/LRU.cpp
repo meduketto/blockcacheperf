@@ -21,25 +21,22 @@ LRU::setup(Cache* cache)
 void
 LRU::cacheHit(const Access* access, CacheEntry* cacheEntry)
 {
-    std::list<CacheEntry*>::iterator iter = std::find(entries_.begin(), entries_.end(), cacheEntry);
-    entries_.erase(iter);
-    entries_.push_back(cacheEntry);
+    entries_.put(cacheEntry);
 }
 
 void
 LRU::cacheMiss(const Access* access, int64_t physicalBlock)
 {
-    if (cache_->getNrUsedBlocks() >= cache_->getNrBlocks()) {
+    if (cache_->isFull()) {
         evict();
     }
     CacheEntry* cacheEntry = cache_->loadCacheEntry(access, physicalBlock);
-    entries_.push_back(cacheEntry);
+    entries_.put(cacheEntry);
 }
 
 void
 LRU::evict()
 {
-    CacheEntry* entry = entries_.front();
-    entries_.pop_front();
+    CacheEntry* entry = entries_.evictLeastRecent();
     cache_->evictCacheEntry(entry);
 }

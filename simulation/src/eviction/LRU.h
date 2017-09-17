@@ -9,6 +9,7 @@
 
 #include "common.h"
 #include "EvictionAlgorithm.h"
+#include "LruList.h"
 
 class LRU: public EvictionAlgorithm {
 public:
@@ -20,7 +21,7 @@ public:
 
 private:
     Cache* cache_;
-    std::list<CacheEntry*> entries_;
+    LruList<CacheEntry*> entries_;
 };
 
 

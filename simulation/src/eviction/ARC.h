@@ -24,10 +24,10 @@ private:
     void replace(int64_t physicalBlock);
 
     Cache* cache_;
-    LruList<CacheEntry*,CacheEntry*> T1;
-    LruList<CacheEntry*,CacheEntry*> T2;
-    LruList<int64_t,int64_t> B1;
-    LruList<int64_t,int64_t> B2;
+    LruList<CacheEntry*> T1;
+    LruList<CacheEntry*> T2;
+    LruList<int64_t> B1;
+    LruList<int64_t> B2;
     int64_t c;
     int64_t p;
 };
