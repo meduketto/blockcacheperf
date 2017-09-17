@@ -31,7 +31,7 @@ OBJS=$(call objpaths,$(SRCS))
 define compile_cxx
 
 $(call objname,$(1)): $(call srcname,$(1)) | $(BUILD)/objs
-	$(CXX) -Isrc $(CPPFLAGS) $(OPTS) $$< -c -o $$@
+	$(CXX) -MMD -MP -Isrc $(CPPFLAGS) $(OPTS) $$< -c -o $$@
 
 endef
 
@@ -49,6 +49,8 @@ $(BUILD)/objs:
 	@mkdir -p $@
 
 $(eval $(call compile_sources,$(SRCS)))
+
+-include $(BUILD)/objs/*.d
 
 $(PROJECT): $(OBJS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
