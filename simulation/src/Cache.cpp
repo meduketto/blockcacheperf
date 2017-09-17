@@ -19,41 +19,46 @@ Cache::Cache(int64_t blockSize, int64_t nrBlocks, EvictionAlgorithm* evictionAlg
     nrBlockWrites_(0)
 {
     for (int i = 0; i < nrBlocks; ++i) {
-        cacheEntries.emplace_back(CacheEntry());
+        cacheEntries_.emplace_back(CacheEntry());
+    }
+    nextEmpty_ = &cacheEntries_[0];
+    for (int i = 0; i < nrBlocks - 1; ++i) {
+        cacheEntries_[i].nextEmpty_ = &cacheEntries_[i+1];
     }
 
     evictionAlgorithm_->setup(this);
 }
 
-// FIXME: speed up via hash table
 CacheEntry*
 Cache::findCacheEntry(int64_t physicalBlock)
 {
-    for (auto& cacheEntry : cacheEntries) {
-        if (cacheEntry.physicalBlock == physicalBlock) return &cacheEntry;
+    auto iter = cacheMap_.find(physicalBlock);
+    if (iter != cacheMap_.end()) {
+        return iter->second;
     }
     return nullptr;
 }
 
-// FIXME: speed up via free list
 CacheEntry*
 Cache::newCacheEntry(int64_t physicalBlock)
 {
-    for (auto& cacheEntry : cacheEntries) {
-        if (cacheEntry.physicalBlock == -1) {
-            ++nrUsedBlocks_;
-            cacheEntry.physicalBlock = physicalBlock;
-            cacheEntry.cachedTimeTick = timeTick_;
-            cacheEntry.lastAccessTimeTick = timeTick_;
-            cacheEntry.evictionData = nullptr;
-            cacheEntry.isDirty = false;
-            return &cacheEntry;
-        }
+    if (!nextEmpty_) {
+        fprintf(stderr, "Cache::newCacheEntry(): evict didn't free up entries\n");
+        exit(1);
     }
 
-    fprintf(stderr, "Cache::newCacheEntry(): evict didn't free up entries\n");
+    CacheEntry* cacheEntry = nextEmpty_;
+    nextEmpty_ = cacheEntry->nextEmpty_;
+    cacheEntry->nextEmpty_ = nullptr;
 
-    return nullptr;
+    ++nrUsedBlocks_;
+    cacheEntry->physicalBlock = physicalBlock;
+    cacheEntry->cachedTimeTick = timeTick_;
+    cacheEntry->lastAccessTimeTick = timeTick_;
+    cacheEntry->evictionData = nullptr;
+    cacheEntry->isDirty = false;
+    cacheMap_.insert(std::make_pair(physicalBlock, cacheEntry));
+    return cacheEntry;
 }
 
 CacheEntry*
@@ -113,6 +118,13 @@ Cache::printStatistics()
 void
 Cache::evictCacheEntry(CacheEntry* cacheEntry)
 {
+    auto iter = cacheMap_.find(cacheEntry->physicalBlock);
+    if (iter == cacheMap_.end()) {
+        printf("cache error\n");
+        exit(0);
+    }
+    cacheMap_.erase(iter);
+
     if (cacheEntry->isDirty) {
         // There is new data on this block
         // In real world, it would have been flushed to disk.
@@ -120,6 +132,9 @@ Cache::evictCacheEntry(CacheEntry* cacheEntry)
     }
 
     cacheEntry->physicalBlock = -1;
+
+    cacheEntry->nextEmpty_ = nextEmpty_;
+    nextEmpty_ = cacheEntry;
 
     --nrUsedBlocks_;
 }

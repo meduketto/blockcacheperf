@@ -6,6 +6,7 @@
 #define CACHE_H 1
 
 #include <vector>
+#include <unordered_map>
 
 #include "common.h"
 #include "Access.h"
@@ -13,10 +14,13 @@
 class EvictionAlgorithm;
 
 class CacheEntry {
+    friend class Cache;
+
 public:
     CacheEntry():
         physicalBlock(-1),
-        evictionData(nullptr)
+        evictionData(nullptr),
+        nextEmpty_(nullptr)
     {
     }
 
@@ -25,6 +29,9 @@ public:
     int64_t lastAccessTimeTick;
     void* evictionData;
     bool isDirty;
+
+private:
+    CacheEntry* nextEmpty_;
 };
 
 class Cache {
@@ -52,7 +59,9 @@ private:
     int64_t nrBlockReads_;
     int64_t nrBlockWrites_;
 
-    std::vector<CacheEntry> cacheEntries;
+    CacheEntry* nextEmpty_;
+    std::vector<CacheEntry> cacheEntries_;
+    std::unordered_map<int64_t,CacheEntry*> cacheMap_;
 };
 
 
