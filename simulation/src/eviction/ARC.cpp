@@ -7,8 +7,6 @@
 #include "eviction/ARC.h"
 #include "Cache.h"
 
-static bool debug = false;
-
 ARC::ARC():
     cache_(nullptr)
 {
@@ -23,88 +21,77 @@ ARC::setup(Cache* cache)
 }
 
 void
+ARC::state(std::stringstream& ss)
+{
+    ss << "|T1|=" << T1.size() << " |B1|=" << B1.size() << " |T2|=" << T2.size() << " |B2|=" << B2.size();
+}
+
+void
 ARC::check()
 {
-    int64_t L = T1.size() + T2.size();
-    int64_t F = L + B1.size() + B2.size();
-    if (L > c) {
-printf("T1 %lu B1 %lu T2 %lu B2 %lu p %ld\n", T1.size(), B1.size(), T2.size(), B2.size(), p);
-        printf("Larger L %ld\n", L);
-    exit(0);
+    const int64_t T = T1.size() + T2.size();
+    const int64_t L = T + B1.size() + B2.size();
+
+    // Invariant: cannot have more items than the cache size
+    if (T > c) {
+        logging::error([this](std::stringstream& ss) { ss << "T > c, "; state(ss); });
     }
+    // Invariant: balance point cannot be greater than the cache size
     if (p > c) {
-printf("T1 %lu B1 %lu T2 %lu B2 %lu p %ld\n", T1.size(), B1.size(), T2.size(), B2.size(), p);
-        printf("Larger p %ld\n", p);
-    exit(0);
+        logging::error([this](std::stringstream& ss) { ss << "p > c, "; state(ss); });
     }
-    if (F > c * 2) {
-printf("T1 %lu B1 %lu T2 %lu B2 %lu p %ld\n", T1.size(), B1.size(), T2.size(), B2.size(), p);
-        printf("Larger F %ld\n", F);
-    exit(0);
+    // Invariant: all items cannot be greater than two times the cache size
+    if (L > c * 2) {
+        logging::error([this](std::stringstream& ss) { ss << "L > 2c, "; state(ss); });
     }
 }
 
 void
 ARC::cacheHit(const Access* access, CacheEntry* cacheEntry)
 {
-    check();
-
-    const int64_t G1 = T1.size() + T2.size() + B1.size() + B2.size();
-
     if (T1.has(cacheEntry)) {
-if (debug) printf("hit1 block %ld\n", cacheEntry->physicalBlock);
+        logging::debug([this](std::stringstream& ss) { ss << "hit1 "; state(ss); });
         T1.remove(cacheEntry);
         T2.put(cacheEntry);
     } else if (T2.has(cacheEntry)) {
-if (debug) printf("hit2 block %ld\n", cacheEntry->physicalBlock);
+        logging::debug([this](std::stringstream& ss) { ss << "hitM "; state(ss); });
         T2.remove(cacheEntry);
         T2.put(cacheEntry);
     } else {
-        printf("Hit should have been in cache.\n");
+        logging::error([this](std::stringstream& ss) { ss << "hit should have been in cache"; });
     }
-if (debug) printf("T1 %lu B1 %lu T2 %lu B2 %lu p %ld\n", T1.size(), B1.size(), T2.size(), B2.size(), p);
-
-    const int64_t G2 = T1.size() + T2.size() +  B1.size() + B2.size();
-    if (G1 != G2) { printf("break\n"); exit(0); }
-
 }
 
 void
 ARC::cacheMiss(const Access* access, int64_t physicalBlock)
 {
-    check();
-
-    const int64_t G1 = T1.size() + T2.size() + B1.size() + B2.size();
-
     if (B1.has(physicalBlock)) {
-if (debug) printf("miss seen1 block %ld\n", physicalBlock);
+        logging::debug([this](std::stringstream& ss) { ss << "miss seen1 "; state(ss); });
         p = std::min(c, p + std::max(B2.size() / B1.size(), 1L));
         replace(physicalBlock);
         B1.remove(physicalBlock);
         CacheEntry* cacheEntry = cache_->loadCacheEntry(access, physicalBlock);
         T2.put(cacheEntry);
-if (debug) printf("T1 %lu B1 %lu T2 %lu B2 %lu p %ld\n", T1.size(), B1.size(), T2.size(), B2.size(), p);
-    const int64_t G2 = T1.size() + T2.size() + B1.size() + B2.size();
-    if (G1 != G2) { printf("break\n"); exit(0); }
+
+        check();
 
         return;
     }
 
     if (B2.has(physicalBlock)) {
-if (debug) printf("miss seen2 block %ld\n", physicalBlock);
+        logging::debug([this](std::stringstream& ss) { ss << "miss seenM "; state(ss); });
         p = std::max(0L, p - std::max(B1.size() / B2.size(), 1L));
         replace(physicalBlock);
         B2.remove(physicalBlock);
         CacheEntry* cacheEntry = cache_->loadCacheEntry(access, physicalBlock);
         T2.put(cacheEntry);
-if (debug) printf("T1 %lu B1 %lu T2 %lu B2 %lu p %ld\n", T1.size(), B1.size(), T2.size(), B2.size(), p);
-    const int64_t G2 = T1.size() + T2.size() + B1.size() + B2.size();
-    if (G1 != G2) { printf("break\n"); exit(0); }
+
+        check();
 
         return;
     }
 
-if (debug) printf("miss unseen block %ld\n", physicalBlock);
+    logging::debug([this](std::stringstream& ss) { ss << "miss "; state(ss); });
 
     const int64_t L1 = T1.size() + B1.size();
     const int64_t L2 = T2.size() + B2.size();
@@ -114,7 +101,6 @@ if (debug) printf("miss unseen block %ld\n", physicalBlock);
             replace(physicalBlock);
         } else {
             CacheEntry* entry = T1.evictLeastRecent();
-//            B1.put(entry->physicalBlock, entry->physicalBlock);
             cache_->evictCacheEntry(entry);
         }
     } else if (L1+L2 >= c) {
@@ -127,16 +113,12 @@ if (debug) printf("miss unseen block %ld\n", physicalBlock);
     CacheEntry* cacheEntry = cache_->loadCacheEntry(access, physicalBlock);
     T1.put(cacheEntry);
 
-if (debug) printf("T1 %lu B1 %lu T2 %lu B2 %lu p %ld\n", T1.size(), B1.size(), T2.size(), B2.size(), p);
+    check();
 }
 
 void
 ARC::replace(int64_t physicalBlock)
 {
-//    if (cache_->getNrUsedBlocks() < cache_->getNrBlocks()) return;
-
-    const int64_t G1 = T1.size() + T2.size()+ B1.size() + B2.size();
-
     if (T1.size() >= 1
         && ((B2.has(physicalBlock) && T1.size() == p)
             || T1.size() > p))
@@ -150,11 +132,6 @@ ARC::replace(int64_t physicalBlock)
         B2.put(entry->physicalBlock);
         cache_->evictCacheEntry(entry);
     }
-
-    const int64_t G2 = T1.size() + T2.size() + B1.size() + B2.size();
-    if (G1 != G2) { printf("break\n"); exit(0); }
-
-
 }
 
 void

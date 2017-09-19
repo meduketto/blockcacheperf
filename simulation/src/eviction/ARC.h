@@ -20,6 +20,7 @@ public:
     virtual void evict();
 
 private:
+    void state(std::stringstream& ss);
     void check();
     void replace(int64_t physicalBlock);
 

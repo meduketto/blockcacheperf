@@ -7,6 +7,7 @@ PROJECT=blockcachesim
 SRCS= main.cpp \
       Cache.cpp \
       Simulator.cpp \
+      Logging.cpp \
       source/CapturedAccesses.cpp \
       eviction/LRU.cpp \
       eviction/ARC.cpp

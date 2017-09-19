@@ -18,11 +18,12 @@ static struct option longopts[] = {
     { "blocksize", required_argument, 0, 'b' },
     { "nrblocks", required_argument, 0, 'n' },
     { "algorithm", required_argument, 0, 'a' },
+    { "verbose", 0, 0, 'v' },
     { "help", 0, 0, 'h' },
     { 0, 0, 0, 0 }
 };
 
-static char shortopts[] = "b:n:a:h";
+static char shortopts[] = "b:n:a:vh";
 
 static void
 usage()
@@ -31,6 +32,7 @@ usage()
          " -b, --blocksize=BYTES    Size of the cache blocks (4Kb)\n"
          " -n, --nrblocks=COUNT     Number of cache slots (10000)\n"
          " -a, --algorithm=ALGO     Eviction algorithm\n"
+         " -v, --verbose            Debug output\n"
          "\n"
          "where ALGO is\n"
          " LRU                      Least recently used\n"
@@ -67,6 +69,10 @@ main(int argc, char* argv[])
 
             case 'a':
                 algorithm = getAlgorithm(optarg);
+                break;
+
+            case 'v':
+                logging::setDebug(true);
                 break;
 
             case 'h':
