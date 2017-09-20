@@ -13,6 +13,7 @@
 #include "source/CapturedAccesses.h"
 #include "eviction/LRU.h"
 #include "eviction/ARC.h"
+#include "eviction/Random2.h"
 
 static struct option longopts[] = {
     { "blocksize", required_argument, 0, 'b' },
@@ -37,6 +38,7 @@ usage()
          "where ALGO is\n"
          " LRU                      Least recently used\n"
          " ARC                      Adaptive replacement cache\n"
+         " R2                       Random-2\n"
     );
 }
 
@@ -45,6 +47,7 @@ getAlgorithm(const char* name)
 {
     if (strcasecmp(name, "lru") == 0) return new LRU();
     if (strcasecmp(name, "arc") == 0) return new ARC();
+    if (strcasecmp(name, "r2") == 0) return new Random2();
     return nullptr;
 }
 

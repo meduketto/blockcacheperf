@@ -10,7 +10,8 @@ SRCS= main.cpp \
       Logging.cpp \
       source/CapturedAccesses.cpp \
       eviction/LRU.cpp \
-      eviction/ARC.cpp
+      eviction/ARC.cpp \
+      eviction/Random2.cpp
 
 UNITTESTS= LruListTest.cpp
 

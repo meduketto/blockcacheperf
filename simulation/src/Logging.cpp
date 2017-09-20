@@ -34,7 +34,7 @@ error(std::function<void(std::stringstream&)> logFunction)
     std::stringstream ss;
     logFunction(ss);
     std::cerr << "ERROR: " << ss.str() << std::endl;
-    exit(1);
+    abort();
 }
 
 void

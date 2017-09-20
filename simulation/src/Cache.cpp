@@ -43,8 +43,7 @@ CacheEntry*
 Cache::newCacheEntry(int64_t physicalBlock)
 {
     if (!nextEmpty_) {
-        fprintf(stderr, "Cache::newCacheEntry(): evict didn't free up entries\n");
-        exit(1);
+        logging::error([](std::stringstream& ss) { ss << "algorithm overloads the cache"; });
     }
 
     CacheEntry* cacheEntry = nextEmpty_;
@@ -105,10 +104,10 @@ Cache::handleAccess(const Access& access)
 void
 Cache::printStatistics()
 {
-    printf("Read accesses = %ld\n"
-           "Write accesses = %ld\n"
-           "Blocks read = %ld\n"
-           "Blocks written = %ld\n",
+    printf("# Read accesses = %ld\n"
+           "# Write accesses = %ld\n"
+           "# Blocks read = %ld\n"
+           "# Blocks written = %ld\n",
            nrReadAccesses_,
            nrWriteAccesses_,
            nrBlockReads_,
@@ -118,10 +117,13 @@ Cache::printStatistics()
 void
 Cache::evictCacheEntry(CacheEntry* cacheEntry)
 {
+    if (cacheEntry->physicalBlock == -1) {
+        logging::error([](std::stringstream& ss) { ss << "algorithm tries to evict bad cache block"; });
+    }
+
     auto iter = cacheMap_.find(cacheEntry->physicalBlock);
     if (iter == cacheMap_.end()) {
-        printf("cache error\n");
-        exit(0);
+        logging::error([](std::stringstream& ss) { ss << "algorithm tries to evict unknown cache block"; });
     }
     cacheMap_.erase(iter);
 
