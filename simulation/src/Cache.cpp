@@ -29,6 +29,52 @@ Cache::Cache(int64_t blockSize, int64_t nrBlocks, EvictionAlgorithm* evictionAlg
     evictionAlgorithm_->setup(this);
 }
 
+void
+Cache::handleAccess(const Access& access)
+{
+    // Every access increments the time
+    ++timeTick_;
+
+    if (access.isRead()) {
+        ++nrReadAccesses_;
+    } else {
+        ++nrWriteAccesses_;
+    }
+
+    // Find the block being asked
+    const int64_t physicalBlock = (access.sector << 9) / blockSize_;
+    CacheEntry* cacheEntry = findCacheEntry(physicalBlock);
+
+    if (cacheEntry) {
+        // Cache Hit :)
+        cacheEntry->lastAccessTimeTick = timeTick_;
+        if (access.isRead()) {
+            cacheEntry->accessBit_ = true;
+        } else {
+            cacheEntry->isDirty = true;
+        }
+        evictionAlgorithm_->cacheHit(&access, cacheEntry);
+
+    } else {
+        // Cache Miss :(
+        evictionAlgorithm_->cacheMiss(&access, physicalBlock);
+
+    }
+}
+
+void
+Cache::printStatistics()
+{
+    printf("# Read accesses = %ld\n"
+           "# Write accesses = %ld\n"
+           "# Blocks read = %ld\n"
+           "# Blocks written = %ld\n",
+           nrReadAccesses_,
+           nrWriteAccesses_,
+           nrBlockReads_,
+           nrBlockWrites_);
+}
+
 CacheEntry*
 Cache::findCacheEntry(int64_t physicalBlock)
 {
@@ -56,62 +102,9 @@ Cache::newCacheEntry(int64_t physicalBlock)
     cacheEntry->lastAccessTimeTick = timeTick_;
     cacheEntry->evictionData = nullptr;
     cacheEntry->isDirty = false;
+    cacheEntry->accessBit_ = false;
     cacheMap_.insert(std::make_pair(physicalBlock, cacheEntry));
     return cacheEntry;
-}
-
-CacheEntry*
-Cache::loadCacheEntry(const Access* access, int64_t physicalBlock)
-{
-    CacheEntry* cacheEntry = newCacheEntry(physicalBlock);
-    // A read cache miss loads the block from the disk
-    // Writes are delayed until they are evicted
-    if (access->isRead()) {
-        ++nrBlockReads_;
-    } else {
-        cacheEntry->isDirty = true;
-    }
-    return cacheEntry;
-}
-
-void
-Cache::handleAccess(const Access& access)
-{
-    // Every access increments the time
-    ++timeTick_;
-
-    if (access.isRead()) {
-        ++nrReadAccesses_;
-    } else {
-        ++nrWriteAccesses_;
-    }
-
-    // Find the block being asked
-    const int64_t physicalBlock = (access.sector << 9) / blockSize_;
-    CacheEntry* cacheEntry = findCacheEntry(physicalBlock);
-
-    if (cacheEntry) {
-        // Cache Hit :)
-        cacheEntry->lastAccessTimeTick = timeTick_;
-        evictionAlgorithm_->cacheHit(&access, cacheEntry);
-        
-    } else {
-        // Cache Miss :(
-        evictionAlgorithm_->cacheMiss(&access, physicalBlock);
-    }
-}
-
-void
-Cache::printStatistics()
-{
-    printf("# Read accesses = %ld\n"
-           "# Write accesses = %ld\n"
-           "# Blocks read = %ld\n"
-           "# Blocks written = %ld\n",
-           nrReadAccesses_,
-           nrWriteAccesses_,
-           nrBlockReads_,
-           nrBlockWrites_);
 }
 
 void
@@ -139,4 +132,18 @@ Cache::evictCacheEntry(CacheEntry* cacheEntry)
     nextEmpty_ = cacheEntry;
 
     --nrUsedBlocks_;
+}
+
+CacheEntry*
+Cache::loadCacheEntry(const Access* access, int64_t physicalBlock)
+{
+    CacheEntry* cacheEntry = newCacheEntry(physicalBlock);
+    // A read cache miss loads the block from the disk
+    // Writes are delayed until they are evicted
+    if (access->isRead()) {
+        ++nrBlockReads_;
+    } else {
+        cacheEntry->isDirty = true;
+    }
+    return cacheEntry;
 }

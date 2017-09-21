@@ -20,7 +20,8 @@ public:
     CacheEntry():
         physicalBlock(-1),
         evictionData(nullptr),
-        nextEmpty_(nullptr)
+        nextEmpty_(nullptr),
+        accessBit_(false)
     {
     }
 
@@ -30,8 +31,12 @@ public:
     void* evictionData;
     bool isDirty;
 
+    bool isAccessed() { return accessBit_; }
+    void resetAccessBit() { accessBit_ = false; }
+
 private:
     CacheEntry* nextEmpty_;
+    bool accessBit_;
 };
 
 class Cache {

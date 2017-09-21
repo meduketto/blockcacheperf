@@ -11,8 +11,9 @@
 #include "Cache.h"
 
 #include "source/CapturedAccesses.h"
-#include "eviction/LRU.h"
 #include "eviction/ARC.h"
+#include "eviction/Clock.h"
+#include "eviction/LRU.h"
 #include "eviction/Random2.h"
 
 static struct option longopts[] = {
@@ -39,14 +40,16 @@ usage()
          " LRU                      Least recently used\n"
          " ARC                      Adaptive replacement cache\n"
          " R2                       Random-2\n"
+         " CLOCK                    CLOCK\n"
     );
 }
 
 static EvictionAlgorithm*
 getAlgorithm(const char* name)
 {
-    if (strcasecmp(name, "lru") == 0) return new LRU();
     if (strcasecmp(name, "arc") == 0) return new ARC();
+    if (strcasecmp(name, "clock") == 0) return new Clock();
+    if (strcasecmp(name, "lru") == 0) return new LRU();
     if (strcasecmp(name, "r2") == 0) return new Random2();
     return nullptr;
 }
