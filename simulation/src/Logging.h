@@ -10,6 +10,10 @@
 
 namespace logging {
 
+void status(const std::string& ss);
+
+void clearStatus();
+
 void debug(std::function<void(std::stringstream&)> logFunction);
 
 void warning(std::function<void(std::stringstream&)> logFunction);

@@ -2,8 +2,6 @@
  * 
  */
 
-#include <stdio.h>
-
 #include "Simulator.h"
 #include "AccessSource.h"
 #include "Access.h"
@@ -37,9 +35,12 @@ Simulator::run()
         cache_->handleAccess(access);
         ++nr;
         if ((nr % 50000) == 0) {
-            printf("nr %ld\n", nr);
+            std::stringstream ss;
+            ss << "Access processed " << nr;
+            logging::status(ss.str());
         }
     }
+    logging::clearStatus();
 
     cache_->printStatistics();
 }

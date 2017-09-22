@@ -9,6 +9,7 @@ SRCS= main.cpp \
       Simulator.cpp \
       Logging.cpp \
       source/CapturedAccesses.cpp \
+      eviction/Algorithms.cpp \
       eviction/ARC.cpp \
       eviction/Clock.cpp \
       eviction/LRU.cpp \

@@ -5,16 +5,14 @@
 #include <getopt.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
 
 #include "common.h"
 #include "Simulator.h"
 #include "Cache.h"
 
 #include "source/CapturedAccesses.h"
-#include "eviction/ARC.h"
-#include "eviction/Clock.h"
-#include "eviction/LRU.h"
-#include "eviction/Random2.h"
+#include "eviction/Algorithms.h"
 
 static struct option longopts[] = {
     { "blocksize", required_argument, 0, 'b' },
@@ -30,27 +28,33 @@ static char shortopts[] = "b:n:a:vh";
 static void
 usage()
 {
-    puts("Usage: blockcachesim [OPTIONS] inputfile\n"
-         " -b, --blocksize=BYTES    Size of the cache blocks (4Kb)\n"
-         " -n, --nrblocks=COUNT     Number of cache slots (10000)\n"
-         " -a, --algorithm=ALGO     Eviction algorithm\n"
-         " -v, --verbose            Debug output\n"
-         "\n"
-         "where ALGO is\n"
-         " LRU                      Least recently used\n"
-         " ARC                      Adaptive replacement cache\n"
-         " R2                       Random-2\n"
-         " CLOCK                    CLOCK\n"
-    );
+    std::cout << "Usage: blockcachesim [OPTIONS] inputfile\n"
+                 "\n"
+                 " -b, --blocksize=BYTES    Size of the cache blocks (default 4Kb)\n"
+                 " -n, --nrblocks=COUNT     Number of cache slots (default 10000)\n"
+                 " -a, --algorithm=ALGO     Eviction algorithm (default LRU)\n"
+                 " -v, --verbose            Enable debug output\n"
+                 "\n"
+                 "where ALGO is\n";
+//             " all                      Everything below\n"
+
+    for (int i = 0; evictionAlgorithms[i].name; ++i) {
+        const char* name = evictionAlgorithms[i].name;
+        std::cout << ' ' << name;
+        for (int j = strlen(name); j < 25; ++j) {
+            std::cout << ' ';
+        }
+        std::cout << evictionAlgorithms[i].description << '\n';
+    }
 }
 
 static EvictionAlgorithm*
 getAlgorithm(const char* name)
 {
-    if (strcasecmp(name, "arc") == 0) return new ARC();
-    if (strcasecmp(name, "clock") == 0) return new Clock();
-    if (strcasecmp(name, "lru") == 0) return new LRU();
-    if (strcasecmp(name, "r2") == 0) return new Random2();
+    AlgorithmDescription* algo = findEvictionAlgorithm(name);
+    if (algo) {
+        return algo->factory();
+    }
     return nullptr;
 }
 
@@ -89,7 +93,7 @@ main(int argc, char* argv[])
 
     if (!algorithm) {
         printf("Using LRU\n");
-        algorithm = new LRU();
+        algorithm = getAlgorithm("lru");
     }
 
     Simulator simulator;
