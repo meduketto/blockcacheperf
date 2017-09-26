@@ -12,6 +12,7 @@ SRCS= main.cpp \
       eviction/Algorithms.cpp \
       eviction/ARC.cpp \
       eviction/Clock.cpp \
+      eviction/ClockPro.cpp \
       eviction/2Q.cpp \
       eviction/LRU.cpp \
       eviction/Random2.cpp

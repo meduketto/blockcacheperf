@@ -30,6 +30,7 @@ usage()
 {
     std::cout << "Usage: blockcachesim [OPTIONS] inputfile\n"
                  "\n"
+                 "where OPTIONS are:\n"
                  " -b, --blocksize=BYTES    Size of the cache blocks (default 4Kb)\n"
                  " -n, --nrblocks=COUNT     Number of cache slots (default 10000)\n"
                  " -a, --algorithm=ALGO     Eviction algorithm (default LRU)\n"
