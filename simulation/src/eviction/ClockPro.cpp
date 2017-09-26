@@ -176,10 +176,10 @@ ClockPro::cacheMiss(const Access* access, int64_t physicalBlock)
     } else {
         // Seen before -> HOT
         ClockProEntry entry(cacheEntry);
-        entry.isHot = true;
-        entry.isInTesting = false;
         removeEntry(iter->second);
         seenBlocks_.erase(iter);
+        entry.isHot = true;
+        entry.isInTesting = false;
         insertListHead(entry);
 
         moveHandHot();
@@ -209,9 +209,9 @@ ClockPro::moveHandCold()
         if (entry.entry->isAccessed()) {
             entry.entry->resetAccessBit();
             if (entry.isInTesting) {
+                removeEntry(handCold_);
                 entry.isHot = true;
                 entry.isInTesting = false;
-                removeEntry(handCold_);
                 insertListHead(entry);
                 moveHandHot();
             } else {
@@ -254,6 +254,8 @@ ClockPro::moveHandHot()
                 entry.entry->resetAccessBit();
             } else {
                 entry.isHot = false;
+                --nrHot_;
+                ++nrCold_;
                 handHotNext();
                 if (nrNonResident_ >= M_) {
                     moveHandTest();
