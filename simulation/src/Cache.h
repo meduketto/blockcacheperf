@@ -25,6 +25,9 @@ public:
     {
     }
 
+    CacheEntry(const CacheEntry&) = default;
+//    CacheEntry(CacheEntry&&) = default;
+
     int64_t physicalBlock;
     int64_t cachedTimeTick;
     int64_t lastAccessTimeTick;

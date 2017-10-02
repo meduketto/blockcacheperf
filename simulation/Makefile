@@ -17,7 +17,8 @@ SRCS= main.cpp \
       eviction/LRU.cpp \
       eviction/Random2.cpp
 
-UNITTESTS= LruListTest.cpp
+UNITTESTS= LruListTest.cpp \
+           CacheTest.cpp
 
 CXX=g++
 CPPFLAGS=-Wall -O2 -g -std=c++11
@@ -42,6 +43,7 @@ objpaths=$(foreach name,$(1),$(call objname,$(name)))
 unittestobjname=$(BUILD)/unittests/$(basename $(notdir $(strip $(1))))
 unittestobjpaths=$(foreach name,$(1),$(call unittestobjname,$(name)))
 OBJS=$(call objpaths,$(SRCS))
+NONMAINOBJS=$(call objpaths,$(filter-out main.cpp,$(SRCS)))
 UNITTESTOBJS=$(call unittestobjpaths,$(UNITTESTS))
 
 define compile_cxx
@@ -60,7 +62,7 @@ endef
 define compile_unittest
 
 $(call unittestobjname,$(1)): $(call unittestname,$(1)) | $(BUILD)/unittests
-	$(CXX) -MMD -MP -Isrc $(GTEST_CPPFLAGS) $(CPPFLAGS) $(LDFLAGS) $(GTEST_LDFLAGS) $(OPTS) $$< -o $$@
+	$(CXX) -MMD -MP -Isrc $(GTEST_CPPFLAGS) $(CPPFLAGS) $(LDFLAGS) $(GTEST_LDFLAGS) $(OPTS) $$< $(NONMAINOBJS) -o $$@
 
 endef
 
