@@ -18,7 +18,8 @@ public:
     AIO(const char* devname, int nrEvents = NR_EVENTS);
     ~AIO();
     void processAccess(int64_t sector, bool isWrite);
-    void waitForCompletion(bool waitForAll=true);
+    void waitForCompletion();
+    void waitForAllCompleted();
 
 private:
     std::size_t pageSize_;

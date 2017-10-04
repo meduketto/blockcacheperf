@@ -74,7 +74,7 @@ main(int argc, char* argv[])
 
     fclose(f);
 
-    aio.waitForCompletion();
+    aio.waitForAllCompleted();
 
     std::cout << "Completion time = " << timer.stop() << " nanoseconds." << std::endl;
 

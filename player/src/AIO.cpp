@@ -83,7 +83,7 @@ void
 AIO::processAccess(int64_t sector, bool isWrite)
 {
     if (freeCbs_.size() == 0) {
-        waitForCompletion(false);
+        waitForCompletion();
     }
 
     struct iocb* iocbp = freeCbs_.front();
@@ -108,24 +108,30 @@ AIO::processAccess(int64_t sector, bool isWrite)
 }
 
 void
-AIO::waitForCompletion(bool waitForAll)
+AIO::waitForCompletion()
 {
     struct io_event events[nrEvents_];
 
-    while (nrActive_ && waitForAll) {
-        int ret = io_getevents(aioCtx_, 1, nrEvents_, &events[0], nullptr);
-        if (ret < 0) {
-            std::cerr << "io_getevents error = " << ret << std::endl;
-            exit(1);
-        }
+    int ret = io_getevents(aioCtx_, 1, nrEvents_, &events[0], nullptr);
+    if (ret < 0) {
+        std::cerr << "io_getevents error = " << ret << std::endl;
+        exit(1);
+    }
 
-        for (int i = 0; i < ret; ++i) {
-            struct iocb* iocbp = (struct iocb*) events[i].data;
-            if (events[i].res != (long long) iocbp->aio_nbytes) {
-                std::cerr << "error event res=" << events[i].res << ", res2=" << events[i].res2 << std::endl;
-            }
-            --nrActive_;
-            freeCbs_.push_back(iocbp);
+    for (int i = 0; i < ret; ++i) {
+        struct iocb* iocbp = (struct iocb*) events[i].data;
+        if (events[i].res != (long long) iocbp->aio_nbytes) {
+            std::cerr << "error event res=" << events[i].res << ", res2=" << events[i].res2 << std::endl;
         }
+        --nrActive_;
+        freeCbs_.push_back(iocbp);
+    }
+}
+
+void
+AIO::waitForAllCompleted()
+{
+    while (nrActive_) {
+        waitForCompletion();
     }
 }
