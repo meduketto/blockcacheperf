@@ -16,7 +16,8 @@ Cache::Cache(int64_t blockSize, int64_t nrBlocks, EvictionAlgorithm* evictionAlg
     nrReadAccesses_(0),
     nrWriteAccesses_(0),
     nrBlockReads_(0),
-    nrBlockWrites_(0)
+    nrBlockWrites_(0),
+    outputFile_(nullptr)
 {
     for (int i = 0; i < nrBlocks; ++i) {
         cacheEntries_.emplace_back(CacheEntry());
@@ -27,6 +28,17 @@ Cache::Cache(int64_t blockSize, int64_t nrBlocks, EvictionAlgorithm* evictionAlg
     }
 
     evictionAlgorithm_->setup(this);
+}
+
+void
+Cache::setOutputFile(const char* filename)
+{
+    outputFile_ = fopen(filename, "w");
+    if (!outputFile_) {
+        logging::error([](std::stringstream& ss) { ss << "cannot open output file"; });
+        return;
+    }
+    fprintf(outputFile_, "# Post-cache traces\n");
 }
 
 void
@@ -124,6 +136,7 @@ Cache::evictCacheEntry(CacheEntry* cacheEntry)
         // There is new data on this block
         // In real world, it would have been flushed to disk.
         nrBlockWrites_++;
+        if (outputFile_) fprintf(outputFile_, "w %ld\n", cacheEntry->physicalBlock);
     }
 
     cacheEntry->physicalBlock = -1;
@@ -141,6 +154,7 @@ Cache::loadCacheEntry(const Access* access, int64_t physicalBlock)
     // A read cache miss loads the block from the disk
     // Writes are delayed until they are evicted
     if (access->isRead()) {
+        if (outputFile_) fprintf(outputFile_, "r %ld\n", cacheEntry->physicalBlock);
         ++nrBlockReads_;
     } else {
         cacheEntry->isDirty = true;

@@ -18,12 +18,13 @@ static struct option longopts[] = {
     { "blocksize", required_argument, 0, 'b' },
     { "nrblocks", required_argument, 0, 'n' },
     { "algorithm", required_argument, 0, 'a' },
+    { "output", required_argument, 0, 'o' },
     { "verbose", 0, 0, 'v' },
     { "help", 0, 0, 'h' },
     { 0, 0, 0, 0 }
 };
 
-static char shortopts[] = "b:n:a:vh";
+static char shortopts[] = "b:n:a:o:vh";
 
 static void
 usage()
@@ -34,6 +35,7 @@ usage()
                  " -b, --blocksize=BYTES    Size of the cache blocks (default 4Kb)\n"
                  " -n, --nrblocks=COUNT     Number of cache slots (default 10000)\n"
                  " -a, --algorithm=ALGO     Eviction algorithm (default LRU)\n"
+                 " -o, --output=FILE        Post-cache trace output file\n"
                  " -v, --verbose            Enable debug output\n"
                  "\n"
                  "where ALGO is\n";
@@ -65,6 +67,7 @@ main(int argc, char* argv[])
     int64_t blockSize = 4096;
     int64_t nrBlocks = 10000;
     EvictionAlgorithm* algorithm = nullptr;
+    const char* output = nullptr;
     int c;
     int i;
 
@@ -80,6 +83,10 @@ main(int argc, char* argv[])
 
             case 'a':
                 algorithm = getAlgorithm(optarg);
+                break;
+
+            case 'o':
+                output = optarg;
                 break;
 
             case 'v':
@@ -112,6 +119,7 @@ main(int argc, char* argv[])
     simulator.setAccessSource(&captured);
 
     Cache cache(blockSize, nrBlocks, algorithm);
+    if (output) cache.setOutputFile(output);
 
     simulator.setCache(&cache);
 

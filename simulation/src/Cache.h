@@ -45,6 +45,7 @@ private:
 class Cache {
 public:
     Cache(int64_t blockSize, int64_t nrBlocks, EvictionAlgorithm* evictionAlgorithm);
+    void setOutputFile(const char* filename);
     void handleAccess(const Access& access);
     void printStatistics();
 
@@ -71,6 +72,8 @@ private:
     CacheEntry* nextEmpty_;
     std::vector<CacheEntry> cacheEntries_;
     std::unordered_map<int64_t,CacheEntry*> cacheMap_;
+
+    FILE* outputFile_;
 };
 
 
