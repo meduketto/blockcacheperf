@@ -11,6 +11,7 @@
 #include "eviction/2Q.h"
 #include "eviction/LRU.h"
 #include "eviction/Random2.h"
+#include "eviction/SpatialClock.h"
 
 static EvictionAlgorithm*
 getARC()
@@ -48,6 +49,11 @@ getR2()
     return new Random2();
 }
 
+static EvictionAlgorithm*
+getSpatialClock()
+{
+    return new SpatialClock();
+}
 
 struct AlgorithmDescription evictionAlgorithms[] = {
     { "ARC",      "Adaptive replacement cache", getARC },
@@ -56,6 +62,7 @@ struct AlgorithmDescription evictionAlgorithms[] = {
     { "2Q",       "2Q",                         get2Q },
     { "LRU",      "Least recently used",        getLRU },
     { "R2",       "Random-2 choice",            getR2 },
+    { "SPATIAL",  "Spatial Clock",              getSpatialClock },
     { nullptr, nullptr, nullptr }
 };
 
