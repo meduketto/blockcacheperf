@@ -112,7 +112,8 @@ Cache::newCacheEntry(int64_t physicalBlock)
     cacheEntry->physicalBlock = physicalBlock;
     cacheEntry->cachedTimeTick = timeTick_;
     cacheEntry->lastAccessTimeTick = timeTick_;
-    cacheEntry->evictionData = nullptr;
+    cacheEntry->evictionPtr = nullptr;
+    cacheEntry->evictionValue = -1;
     cacheEntry->isDirty = false;
     cacheEntry->accessBit_ = false;
     cacheMap_.insert(std::make_pair(physicalBlock, cacheEntry));

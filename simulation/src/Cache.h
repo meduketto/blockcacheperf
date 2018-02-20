@@ -19,7 +19,8 @@ class CacheEntry {
 public:
     CacheEntry():
         physicalBlock(-1),
-        evictionData(nullptr),
+        evictionPtr(nullptr),
+        evictionValue(-1),
         nextEmpty_(nullptr),
         accessBit_(false)
     {
@@ -31,7 +32,8 @@ public:
     int64_t physicalBlock;
     int64_t cachedTimeTick;
     int64_t lastAccessTimeTick;
-    void* evictionData;
+    void* evictionPtr;
+    int64_t evictionValue;
     bool isDirty;
 
     bool isAccessed() { return accessBit_; }

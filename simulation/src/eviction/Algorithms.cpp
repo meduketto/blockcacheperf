@@ -12,6 +12,7 @@
 #include "eviction/LRU.h"
 #include "eviction/Random2.h"
 #include "eviction/SpatialClock.h"
+#include "eviction/RRIP.h"
 
 static EvictionAlgorithm*
 getARC()
@@ -55,14 +56,28 @@ getSpatialClock()
     return new SpatialClock();
 }
 
+static EvictionAlgorithm*
+getRRIP()
+{
+    return new RRIP(false);
+}
+
+static EvictionAlgorithm*
+getDRRIP()
+{
+    return new RRIP(true);
+}
+
 struct AlgorithmDescription evictionAlgorithms[] = {
-    { "ARC",      "Adaptive replacement cache", getARC },
-    { "CLOCK",    "Clock",                      getClock },
-    { "CLOCKPRO", "Clock-Pro",                  getClockPro },
-    { "2Q",       "2Q",                         get2Q },
-    { "LRU",      "Least recently used",        getLRU },
-    { "R2",       "Random-2 choice",            getR2 },
-    { "SPATIAL",  "Spatial Clock",              getSpatialClock },
+    { "ARC",      "Adaptive replacement cache",       getARC },
+    { "CLOCK",    "Clock",                            getClock },
+    { "CLOCKPRO", "Clock-Pro",                        getClockPro },
+    { "2Q",       "2Q",                               get2Q },
+    { "LRU",      "Least recently used",              getLRU },
+    { "R2",       "Random-2 choice",                  getR2 },
+    { "SPATIAL",  "Spatial Clock",                    getSpatialClock },
+    { "RRIP",     "Re-Reference Interval Prediction", getRRIP },
+    { "DRRIP",    "Dynamic RRIP",                     getDRRIP },
     { nullptr, nullptr, nullptr }
 };
 
