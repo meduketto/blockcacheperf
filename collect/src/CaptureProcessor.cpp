@@ -89,8 +89,8 @@ getName(char* line)
     char* t = strstr(line, "name:");
     if (!t) return nullptr;
     t += 5;
+    char *s = t + strlen(t) - 1;
     while (1) {
-        char *s = t + strlen(t) - 1;
         if (s[0] == '\r' || s[0] == '\n') {
             s[0] = '\0';
             --s;
@@ -173,11 +173,14 @@ CaptureProcessor::processLine(char* line)
             return true;
         }
         const char* name = getName(line + 3);
+        if (!name) {
+            fprintf(stderr, "Cannot find file name [%s]\n", line);
+        }
         struct FileMap *map = new struct FileMap;
         map->inode = inode;
         if (!map->blockMap.map(name)) {
             delete map;
-            printf("Ignoring [%s]\n", name);
+            fprintf(stderr, "Ignoring [%s]\n", name);
             return true;
         }
         fileMaps.push_back(map);

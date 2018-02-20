@@ -33,23 +33,27 @@ class Database:
         c = self.conn.cursor()
         c.execute("CREATE TABLE ledger (accountId INTEGER PRIMARY KEY, name TEXT, address TEXT, money INTEGER)")
         c.execute("BEGIN")
-        for _ in range(numberOfEntries):
+        for _ in range(self.numberOfEntries):
             c.execute("INSERT INTO ledger (name,address,money) VALUES(?,?,?)",
                       (fake_name(), fake_address(), random.randint(50000,100000)))
         c.execute("COMMIT")
 
-    def runTest(self, doAppCache):
+    def runTest(self, doAppCache, readPercentage):
         self.conn.isolation_level = None
         c = self.conn.cursor()
+        if not doAppCache:
+            c.execute("PRAGMA cache_size=0;")
         #
+        writePercentage = int(readPercentage + ((100 - readPercentage) * .7))
+        print "appCache=", doAppCache, ", read%=", readPercentage, "write%=", writePercentage
         for _a in range(500):
             c.execute("BEGIN")
             for _b in range(10000):
                 op = random.randint(0,100)
-                if op < 90:
+                if op < readPercentage:
                     self.nrQueries += 1
                     c.execute("SELECT * FROM ledger WHERE accountId=?", (random.randint(1, self.numberOfEntries-1),))
-                elif op < 97:
+                elif op < writePercentage:
                     self.nrDeposits += 1
                     c.execute("UPDATE ledger SET money=money+? WHERE accountId=?",
                               (random.randint(-10,10), random.randint(1, self.numberOfEntries-1)))
@@ -76,5 +80,5 @@ if sys.argv[1] == "create":
     database.close()
 elif sys.argv[1] == "run":
     database = Database(sys.argv[2])
-    database.runTest(False)
+    database.runTest(bool(int(sys.argv[3])), int(sys.argv[4]))
     database.close()
