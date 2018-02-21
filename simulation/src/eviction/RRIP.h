@@ -6,6 +6,7 @@
 #define RRIP_H 1
 
 #include <list>
+#include <random>
 
 #include "common.h"
 #include "EvictionAlgorithm.h"
@@ -20,9 +21,11 @@ public:
 
 private:
     Cache* cache_;
-    bool dynamic_;
+    bool bimodal_;
+    std::default_random_engine randomEngine_;
     std::list<CacheEntry*> entries_;
 
+    int64_t predictReReference();
     std::list<CacheEntry*>::iterator findCandidate();
 };
 

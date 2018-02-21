@@ -5,9 +5,9 @@
 #include "eviction/RRIP.h"
 #include "Cache.h"
 
-RRIP::RRIP(bool dynamic):
+RRIP::RRIP(bool bimodal):
     cache_(nullptr),
-    dynamic_(dynamic)
+    bimodal_(bimodal)
 {
 }
 
@@ -20,7 +20,30 @@ RRIP::setup(Cache* cache)
 void
 RRIP::cacheHit(const Access* access, CacheEntry* cacheEntry)
 {
+    // RRIP-HP: Hit Policy: near-immediate re-reference is predicted
+    // This policy is found to be performing better in the paper
     cacheEntry->evictionValue = 0;
+    // RRIP-FP: Frequency Policy: shorter re-reference is predicted
+    // if (cacheEntry->evictionValue > 0) --cacheEntry->evictionValue;
+}
+
+int64_t
+RRIP::predictReReference()
+{
+    if (bimodal_) {
+        std::uniform_int_distribution<int> dist(0, 99);
+        int dice = dist(randomEngine_);
+        if (dice >= 95) {
+            // Long Re-Reference is predicted for small number (~ %5)
+            return 2;
+        } else {
+            // Distant Re-Reference is predicted for majority
+            return 3;
+        }
+    } else {
+        // Long Re-Reference is predicted
+        return 2;
+    }
 }
 
 void
@@ -28,7 +51,7 @@ RRIP::cacheMiss(const Access* access, int64_t physicalBlock)
 {
     if (!cache_->isFull()) {
         CacheEntry* cacheEntry = cache_->loadCacheEntry(access, physicalBlock);
-        cacheEntry->evictionValue = 2;
+        cacheEntry->evictionValue = predictReReference();
         entries_.push_back(cacheEntry);
         return;
     }
@@ -38,7 +61,7 @@ RRIP::cacheMiss(const Access* access, int64_t physicalBlock)
     cache_->evictCacheEntry(oldCacheEntry);
 
     CacheEntry* cacheNewEntry = cache_->loadCacheEntry(access, physicalBlock);
-    cacheNewEntry->evictionValue = 2;
+    cacheNewEntry->evictionValue = predictReReference();
     *iter = cacheNewEntry;
 }
 

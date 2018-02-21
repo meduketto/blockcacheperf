@@ -13,6 +13,7 @@
 #include "eviction/Random2.h"
 #include "eviction/SpatialClock.h"
 #include "eviction/RRIP.h"
+#include "eviction/CAR.h"
 
 static EvictionAlgorithm*
 getARC()
@@ -63,9 +64,15 @@ getRRIP()
 }
 
 static EvictionAlgorithm*
-getDRRIP()
+getBRRIP()
 {
     return new RRIP(true);
+}
+
+static EvictionAlgorithm*
+getCAR()
+{
+    return new CAR();
 }
 
 struct AlgorithmDescription evictionAlgorithms[] = {
@@ -77,7 +84,8 @@ struct AlgorithmDescription evictionAlgorithms[] = {
     { "R2",       "Random-2 choice",                  getR2 },
     { "SPATIAL",  "Spatial Clock",                    getSpatialClock },
     { "RRIP",     "Re-Reference Interval Prediction", getRRIP },
-    { "DRRIP",    "Dynamic RRIP",                     getDRRIP },
+    { "BRRIP",    "Bimodal RRIP",                     getBRRIP },
+    { "CAR",      "Clock wih Adaptive Replacement",   getCAR },
     { nullptr, nullptr, nullptr }
 };
 
