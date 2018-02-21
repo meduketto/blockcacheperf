@@ -18,7 +18,8 @@ SRCS= main.cpp \
       eviction/Random2.cpp \
       eviction/SpatialClock.cpp \
       eviction/RRIP.cpp \
-      eviction/CAR.cpp
+      eviction/CAR.cpp \
+      eviction/FAB.cpp
 
 UNITTESTS= LruListTest.cpp \
            CacheTest.cpp

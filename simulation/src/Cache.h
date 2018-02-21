@@ -54,6 +54,7 @@ public:
     void evictCacheEntry(CacheEntry* cacheEntry);
     CacheEntry* loadCacheEntry(const Access* access, int64_t physicalBlock);
     int64_t getNrBlocks() const { return nrBlocks_; }
+    int64_t getBlockSize() const { return blockSize_; }
     int64_t getNrUsedBlocks() const { return nrUsedBlocks_; }
     bool isFull() const { return nrUsedBlocks_ >= nrBlocks_; }
 

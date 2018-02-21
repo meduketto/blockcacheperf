@@ -14,6 +14,7 @@
 #include "eviction/SpatialClock.h"
 #include "eviction/RRIP.h"
 #include "eviction/CAR.h"
+#include "eviction/FAB.h"
 
 static EvictionAlgorithm*
 getARC()
@@ -75,6 +76,12 @@ getCAR()
     return new CAR();
 }
 
+static EvictionAlgorithm*
+getFAB()
+{
+    return new FAB();
+}
+
 struct AlgorithmDescription evictionAlgorithms[] = {
     { "ARC",      "Adaptive replacement cache",       getARC },
     { "CLOCK",    "Clock",                            getClock },
@@ -86,6 +93,7 @@ struct AlgorithmDescription evictionAlgorithms[] = {
     { "RRIP",     "Re-Reference Interval Prediction", getRRIP },
     { "BRRIP",    "Bimodal RRIP",                     getBRRIP },
     { "CAR",      "Clock wih Adaptive Replacement",   getCAR },
+    { "FAB",      "Flash Aware Buffer",               getFAB },
     { nullptr, nullptr, nullptr }
 };
 
