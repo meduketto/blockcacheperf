@@ -2,6 +2,11 @@
 #
 #
 
+# Example usage:
+# stap -g --suppress-time-limits -o tracedata.txt capture.stp /home/gurer/git/blockcacheperf/testarea/
+
+# Use this for kernel compile capture as it has a lot of files
+#global trackedfiles[1000000]
 global trackedfiles
 
 probe begin
