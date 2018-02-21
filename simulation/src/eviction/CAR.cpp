@@ -118,12 +118,16 @@ CAR::evict()
     if (T1.size() > target) {
         if (!evictFromT1()) evictFromT2();
     } else {
-        if (!evictFromT2()) evictFromT1();
+        if (!evictFromT2()) {
+            if (!evictFromT1()) {
+                evictFromT2();
+            }
+        }
     }
 
     if (T1.size() + B1.size() == c) {
-        B1.evictLeastRecent();
+        if (B1.size() > 0) B1.evictLeastRecent(); else B2.evictLeastRecent();
     } else {
-        B2.evictLeastRecent();
+        if (B2.size() > 0) B2.evictLeastRecent(); else B1.evictLeastRecent();
     }
 }
