@@ -31,8 +31,8 @@ usage()
                  "\n"
                  "where OPTIONS are:\n"
                  " -r, --repeat <N>         Repeat the test N times (default 1)\n"
-                 " -q, --queue_size <N>     AIO queue length (default 100)\n"
-                 " -s, --sector_size <N>    Disk sector size (default 512)\n"
+                 " -q, --queue_size <N>     AIO queue length (default " << AIO::NR_EVENTS << ")\n"
+                 " -s, --sector_size <N>    Disk sector size (default " << AIO::SECTOR_SIZE << ")\n"
                  " -v, --verbose            Enable debug output\n"
                  ;
 }
