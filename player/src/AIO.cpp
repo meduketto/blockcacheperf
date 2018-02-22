@@ -39,8 +39,8 @@ io_getevents(aio_context_t ctx, long min_nr, long max_nr, struct io_event* event
 //
 
 
-AIO::AIO(const char* devname, int nrEvents):
-    sectorSize_(SECTOR_SIZE),
+AIO::AIO(const char* devname, int nrEvents, std::size_t sectorSize):
+    sectorSize_(sectorSize),
     nrEvents_(nrEvents),
     nrActive_(0)
 {

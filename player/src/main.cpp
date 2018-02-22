@@ -14,12 +14,15 @@
 #include "AIO.h"
 
 static struct option longopts[] = {
+    { "repeat", required_argument, 0, 'r' },
+    { "queue-size", required_argument, 0, 'q' },
+    { "sector-size", required_argument, 0, 's' },
     { "verbose", 0, 0, 'v' },
     { "help", 0, 0, 'h' },
     { 0, 0, 0, 0 }
 };
 
-static char shortopts[] = "vh";
+static char shortopts[] = "q:s:r:vh";
 
 static void
 usage()
@@ -27,6 +30,9 @@ usage()
     std::cout << "Usage: cacheplayer [OPTIONS] devfile inputfile\n"
                  "\n"
                  "where OPTIONS are:\n"
+                 " -r, --repeat <N>         Repeat the test N times (default 1)\n"
+                 " -q, --queue_size <N>     AIO queue length (default 100)\n"
+                 " -s, --sector_size <N>    Disk sector size (default 512)\n"
                  " -v, --verbose            Enable debug output\n"
                  ;
 }
@@ -36,6 +42,9 @@ main(int argc, char* argv[])
 {
     int c;
     int i;
+    int repeat = 1;
+    std::size_t queue_size = AIO::NR_EVENTS;
+    std::size_t sector_size = AIO::SECTOR_SIZE;
 
     while ((c = getopt_long (argc, argv, shortopts, longopts, &i)) != -1) {
         switch (c) {
@@ -45,34 +54,49 @@ main(int argc, char* argv[])
             case 'h':
                 usage();
                 return 0;
+
+            case 'r':
+                repeat = strtoll(optarg, nullptr, 10);
+                break;
+
+            case 'q':
+                queue_size = strtoll(optarg, nullptr, 10);
+                break;
+
+            case 's':
+                sector_size = strtoll(optarg, nullptr, 10);
+                break;
         }
     }
 
     Timer timer;
 
-    AIO aio(argv[1]);
+    AIO aio(argv[optind++], queue_size, sector_size);
 
-    FILE* f = fopen(argv[2], "r");
-    if (!f) {
-        std::cerr << "Cannot open input file." << std::endl;
-        exit(1);
-    }
+    for (int i = 0; i < repeat; ++i) {
 
-    char line[512];
-
-    while (fgets(line, sizeof(line)-1, f)) {
-        if (strncmp(line, "r ", 2) == 0) {
-            int64_t sector = strtoll(line + 2, nullptr, 10);
-            aio.processAccess(sector, 0);
-        } else if (strncmp(line, "w ", 2) == 0) {
-            int64_t sector = strtoll(line + 2, nullptr, 10);
-            aio.processAccess(sector, 1);
-        } else {
-            // ignore comments, empty lines, etc
+        FILE* f = fopen(argv[optind], "r");
+        if (!f) {
+            std::cerr << "Cannot open input file." << std::endl;
+            exit(1);
         }
-    }
 
-    fclose(f);
+        char line[512];
+
+        while (fgets(line, sizeof(line)-1, f)) {
+            if (strncmp(line, "r ", 2) == 0) {
+                int64_t sector = strtoll(line + 2, nullptr, 10);
+                aio.processAccess(sector, 0);
+            } else if (strncmp(line, "w ", 2) == 0) {
+                int64_t sector = strtoll(line + 2, nullptr, 10);
+                aio.processAccess(sector, 1);
+            } else {
+                // ignore comments, empty lines, etc
+            }
+        }
+
+        fclose(f);
+    }
 
     aio.waitForAllCompleted();
 

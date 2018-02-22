@@ -11,11 +11,11 @@
 #include "common.h"
 
 class AIO {
-    static constexpr int NR_EVENTS = 100;
+public:
+    static constexpr int NR_EVENTS = 500;
     static constexpr std::size_t SECTOR_SIZE = 512;
 
-public:
-    AIO(const char* devname, int nrEvents = NR_EVENTS);
+    AIO(const char* devname, int nrEvents = NR_EVENTS, std::size_t sectorSize = SECTOR_SIZE);
     ~AIO();
     void processAccess(int64_t sector, bool isWrite);
     void waitForCompletion();
