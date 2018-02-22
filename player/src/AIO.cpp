@@ -95,21 +95,38 @@ AIO::processAccess(int64_t sector, bool isWrite)
     iocbp->aio_nbytes = sectorSize_;
     iocbp->aio_offset = sector * sectorSize_;
 
-    struct iocb* array[2];
-    array[0] = iocbp;
+    queuedCbs_.push_back(iocbp);
+}
 
-    int ret = io_submit(aioCtx_, 1, array);
-    if (ret == 1) {
-        ++nrActive_;
+void
+AIO::processQueued()
+{
+    struct iocb* array[nrEvents_ + 1];
+
+    int nr = 0;
+    while (queuedCbs_.size() > 0) {
+        struct iocb* iocbp = queuedCbs_.front();
+        queuedCbs_.pop_front();
+
+        array[nr++] = iocbp;
+    }
+    array[nr] = nullptr;
+
+    int ret = io_submit(aioCtx_, nr, array);
+    if (ret == nr) {
+        nrActive_ += nr;
     } else {
         std::cerr << "io_submit error = " << ret << std::endl;
-        freeCbs_.push_back(iocbp);
     }
 }
 
 void
 AIO::waitForCompletion()
 {
+    if (queuedCbs_.size() >= (std::size_t)(nrEvents_ / 2)) {
+        processQueued();
+    }
+
     struct io_event events[nrEvents_];
 
     int ret = io_getevents(aioCtx_, 1, nrEvents_, &events[0], nullptr);
@@ -131,6 +148,10 @@ AIO::waitForCompletion()
 void
 AIO::waitForAllCompleted()
 {
+    if (queuedCbs_.size() > 0) {
+        processQueued();
+    }
+
     while (nrActive_) {
         waitForCompletion();
     }
