@@ -30,7 +30,7 @@ private:
     LruList<int64_t> B1;
     LruList<int64_t> B2;
     uint64_t c;
-    uint64_t p;
+    int64_t p;
 };
 
 

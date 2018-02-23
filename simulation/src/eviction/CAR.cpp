@@ -45,21 +45,21 @@ CAR::cacheMiss(const Access* access, int64_t physicalBlock)
 
     if (B1.has(physicalBlock)) {
         logging::debug([this](std::stringstream& ss) { ss << "miss B1 "; state(ss); });
+        p = std::min(p + std::max(1L, B2.size() / B1.size()), (int64_t)c);
         B1.remove(physicalBlock);
         CacheEntry* cacheEntry = cache_->loadCacheEntry(access, physicalBlock);
         cacheEntry->resetAccessBit();
         T2.push_back(cacheEntry);
-        p = std::min(p + std::max(1L, B2.size() / B1.size()), c);
         return;
     }
 
     if (B2.has(physicalBlock)) {
         logging::debug([this](std::stringstream& ss) { ss << "miss B2 "; state(ss); });
+        p = std::max(p - std::max(1L, B1.size() / B2.size()), 0L);
         B2.remove(physicalBlock);
         CacheEntry* cacheEntry = cache_->loadCacheEntry(access, physicalBlock);
         cacheEntry->resetAccessBit();
         T2.push_back(cacheEntry);
-        p = std::max(p - std::max(1L, B1.size() / B2.size()), 0UL);
         return;
     }
 
@@ -84,7 +84,7 @@ void
 CAR::evict()
 {
     while (T1.size() + T2.size() > 0) {
-        if (T1.size() >= std::max(1UL, p)) {
+        if (T1.size() >= (uint64_t) std::max(1L, p)) {
             CacheEntry* cacheEntry = T1.front();
             T1.pop_front();
             if (cacheEntry->isAccessed()) {
