@@ -8,10 +8,10 @@
 #include "Cache.h"
 
 CAR::CAR():
-    cache_(nullptr)
+    cache_(nullptr),
+    c(0),
+    p(0)
 {
-    T1hand = T1.end();
-    T2hand = T2.end();
 }
 
 void
@@ -19,13 +19,12 @@ CAR::setup(Cache* cache)
 {
     cache_ = cache;
     c = cache_->getNrBlocks();
-    target = c / 2;
 }
 
 void
 CAR::state(std::stringstream& ss)
 {
-    ss << "|T1|=" << T1.size() << " |B1|=" << B1.size() << " |T2|=" << T2.size() << " |B2|=" << B2.size() << " target=" << target;
+    ss << "|T1|=" << T1.size() << " |B1|=" << B1.size() << " |T2|=" << T2.size() << " |B2|=" << B2.size() << " p=" << p;
 }
 
 void
@@ -39,6 +38,9 @@ CAR::cacheMiss(const Access* access, int64_t physicalBlock)
 {
     if (cache_->isFull()) {
         evict();
+        if (!B1.has(physicalBlock) && !B2.has(physicalBlock)) {
+            evictDirectory();
+        }
     }
 
     if (B1.has(physicalBlock)) {
@@ -47,7 +49,7 @@ CAR::cacheMiss(const Access* access, int64_t physicalBlock)
         CacheEntry* cacheEntry = cache_->loadCacheEntry(access, physicalBlock);
         cacheEntry->resetAccessBit();
         T2.push_back(cacheEntry);
-        ++target;
+        p = std::min(p + std::max(1L, B2.size() / B1.size()), c);
         return;
     }
 
@@ -57,7 +59,7 @@ CAR::cacheMiss(const Access* access, int64_t physicalBlock)
         CacheEntry* cacheEntry = cache_->loadCacheEntry(access, physicalBlock);
         cacheEntry->resetAccessBit();
         T2.push_back(cacheEntry);
-        --target;
+        p = std::max(p - std::max(1L, B1.size() / B2.size()), 0UL);
         return;
     }
 
@@ -68,68 +70,42 @@ CAR::cacheMiss(const Access* access, int64_t physicalBlock)
     T1.push_back(cacheEntry);
 }
 
-bool
-CAR::evictFromT1()
+void
+CAR::evictDirectory()
 {
-    while (T1.size() > 0) {
-        if (T1hand == T1.end()) T1hand = T1.begin();
-
-        std::list<CacheEntry*>::iterator entryHand(T1hand);
-        CacheEntry* cacheEntry = *entryHand;
-        ++T1hand;
-
-        if (cacheEntry->isAccessed()) {
-            cacheEntry->resetAccessBit();
-            T1.erase(entryHand);
-            T2.push_back(cacheEntry);
-        } else {
-            T1.erase(entryHand);
-            B1.put(cacheEntry->physicalBlock);
-            cache_->evictCacheEntry(cacheEntry);
-            return true;
-        }
+    if (T1.size() + B1.size() == c) {
+        if (B1.size() > 0) B1.evictLeastRecent();
+    } else {
+        if (B2.size() > 0) B2.evictLeastRecent();
     }
-    return false;
-}
-
-bool
-CAR::evictFromT2()
-{
-    while (T2.size() > 0) {
-        if (T2hand == T2.end()) T2hand = T2.begin();
-
-        std::list<CacheEntry*>::iterator entryHand(T2hand);
-        CacheEntry* cacheEntry = *entryHand;
-        ++T2hand;
-
-        if (cacheEntry->isAccessed()) {
-            cacheEntry->resetAccessBit();
-        } else {
-            T2.erase(entryHand);
-            B2.put(cacheEntry->physicalBlock);
-            cache_->evictCacheEntry(cacheEntry);
-            return true;
-        }
-    }
-    return false;
 }
 
 void
 CAR::evict()
 {
-    if (T1.size() > target) {
-        if (!evictFromT1()) evictFromT2();
-    } else {
-        if (!evictFromT2()) {
-            if (!evictFromT1()) {
-                evictFromT2();
+    while (T1.size() + T2.size() > 0) {
+        if (T1.size() >= std::max(1UL, p)) {
+            CacheEntry* cacheEntry = T1.front();
+            T1.pop_front();
+            if (cacheEntry->isAccessed()) {
+                cacheEntry->resetAccessBit();
+                T2.push_back(cacheEntry);
+            } else {
+                B1.put(cacheEntry->physicalBlock);
+                cache_->evictCacheEntry(cacheEntry);
+                return;
+            }
+        } else {
+            CacheEntry* cacheEntry = T2.front();
+            T2.pop_front();
+            if (cacheEntry->isAccessed()) {
+                cacheEntry->resetAccessBit();
+                T2.push_back(cacheEntry);
+            } else {
+                B2.put(cacheEntry->physicalBlock);
+                cache_->evictCacheEntry(cacheEntry);
+                return;
             }
         }
-    }
-
-    if (T1.size() + B1.size() == c) {
-        if (B1.size() > 0) B1.evictLeastRecent();
-    } else {
-        if (B2.size() > 0) B2.evictLeastRecent();
     }
 }

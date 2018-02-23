@@ -22,18 +22,15 @@ public:
 private:
     void state(std::stringstream& ss);
     void replace(int64_t physicalBlock);
-    bool evictFromT1();
-    bool evictFromT2();
+    void evictDirectory();
 
     Cache* cache_;
     std::list<CacheEntry*> T1;
-    std::list<CacheEntry*>::iterator T1hand;
     std::list<CacheEntry*> T2;
-    std::list<CacheEntry*>::iterator T2hand;
     LruList<int64_t> B1;
     LruList<int64_t> B2;
     uint64_t c;
-    uint64_t target;
+    uint64_t p;
 };
 
 
