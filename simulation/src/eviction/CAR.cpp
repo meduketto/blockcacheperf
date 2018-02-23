@@ -10,6 +10,8 @@
 CAR::CAR():
     cache_(nullptr)
 {
+    T1hand = T1.end();
+    T2hand = T2.end();
 }
 
 void
@@ -23,7 +25,7 @@ CAR::setup(Cache* cache)
 void
 CAR::state(std::stringstream& ss)
 {
-    ss << "|T1|=" << T1.size() << " |B1|=" << B1.size() << " |T2|=" << T2.size() << " |B2|=" << B2.size();
+    ss << "|T1|=" << T1.size() << " |B1|=" << B1.size() << " |T2|=" << T2.size() << " |B2|=" << B2.size() << " target=" << target;
 }
 
 void
@@ -126,8 +128,8 @@ CAR::evict()
     }
 
     if (T1.size() + B1.size() == c) {
-        if (B1.size() > 0) B1.evictLeastRecent(); else B2.evictLeastRecent();
+        if (B1.size() > 0) B1.evictLeastRecent();
     } else {
-        if (B2.size() > 0) B2.evictLeastRecent(); else B1.evictLeastRecent();
+        if (B2.size() > 0) B2.evictLeastRecent();
     }
 }
