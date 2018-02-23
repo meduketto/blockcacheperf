@@ -40,11 +40,27 @@ CLOCKPRO         675625         181939         7538955639
 LRU              675594         181910         7015385605
 R2               672383         181832         8201480907
 SPATIAL          675612         181928         7618895343
-RRIP             675618         181935
-BRRIP            680852         187171
-CAR              675594         181910
+RRIP             675618         181935         6574233729
+BRRIP            680852         187171         7046442162
+CAR              675594         181910         6684627688
 
 
+
+=== Sqlite-5m-10r90w ===
+
+                   Read        Written               Time
+            
+= 10k blocks =
+ARC              
+CLOCK           
+CLOCKPRO         
+2Q               
+LRU             
+R2               
+SPATIAL         
+RRIP            
+BRRIP            
+CAR            
 
 
 
