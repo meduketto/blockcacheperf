@@ -6,7 +6,7 @@ nr_reads = 0
 nr_writes = 0
 read_set = set()
 write_set = set()
-low_sector = 0
+low_sector = 2**62
 high_sector = 0
 
 for line in file(sys.argv[1]):
@@ -18,6 +18,9 @@ for line in file(sys.argv[1]):
         is_write = True
         sector = int(line.split(" ", 1)[1])
     else:
+        continue
+
+    if sector == -1:
         continue
 
     low_sector = min(low_sector, sector)
