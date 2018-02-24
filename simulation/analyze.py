@@ -33,12 +33,15 @@ for line in file(sys.argv[1]):
         nr_reads += 1
         read_set.add(sector)
 
+all_set = read_set.union(write_set)
+
 stats = (
     nr_reads,
     nr_writes,
     len(read_set),
-    len(write_set)
+    len(write_set),
+    len(all_set)
 )
-print "%s reads, %s writes, %s unique reads, %s unique writes of sectors." % stats
+print "%s reads, %s writes, %s unique reads, %s unique writes, %s unique sectors." % stats
 
 print "low sector %s, high sector %s." % (low_sector, high_sector)
