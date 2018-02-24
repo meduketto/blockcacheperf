@@ -1,8 +1,9 @@
 
 === Linux-4.15.4-Compile ===
+39526517 reads, 2443430 writes, 901178 unique reads, 2075797 unique writes, 2415560 unique sectors.
+low sector 9064208, high sector 191249560.
 
                    Read        Written               Time
-
 = 10k blocks =
 ARC              218102         284603         4864685916
 CLOCK            199849         287966         4933146750
@@ -29,9 +30,10 @@ CAR              444338         295903         7555606984
 
 
 === SequentialCopyGrep ===
+5472132 reads, 1460956 writes, 2442638 unique reads, 1455272 unique writes, 3897910 unique sectors.
+low sector 720896, high sector 172340391.
 
                    Read        Written               Time
-
 = 10k blocks =
 ARC              675594         181911         6718381048
 CLOCK            675605         181944         6721156468
@@ -45,11 +47,18 @@ BRRIP            680852         187171         7046442162
 CAR              675611         181926         7045108056
 
 
+=== WebOfficeDesktop ===
+52310 reads, 14124 writes, 33020 unique reads, 10527 unique writes, 42107 unique sectors.
+low sector 76808, high sector 151284449.
+
+
+
 
 === Sqlite-NoAppCache-5m-10r90w ===
+180189834 reads, 40875389 writes, 1427090 unique reads, 1428569 unique writes, 1428577 unique sectors.
+low sector 166772736, high sector 173214823.
 
                    Read        Written               Time
-            
 = 10k blocks =
 ARC             9468506        8679587       267013521080
 CLOCK           9465074        8571702       285360485691
@@ -81,7 +90,6 @@ CAR            10352762        9000539       299742846065
 low sector 166772736, high sector 173396679.
 
                    Read        Written               Time
-            
 = 10k blocks =
 ARC             9493880        3421141       167037569902
 CLOCK           9472682        3396620       180331194042
@@ -99,6 +107,32 @@ CAR             9468689        3395181
 
 
 
+=== Sqlite-NoAppCache-5m-90r10w ===
+180019987 reads, 4930829 writes, 1450983 unique reads, 1375153 unique writes, 1451077 unique sectors.
+low sector 166772736, high sector 173401191.
+
+                   Read        Written               Time
+= 10k blocks =
+ARC              
+CLOCK           
+CLOCKPRO         
+2Q               
+LRU             
+R2               
+SPATIAL         
+RRIP            
+BRRIP            
+CAR            
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -106,8 +140,6 @@ CAR             9468689        3395181
 
 
                    Read        Written               Time
-            
-
 = 10k blocks =
 ARC              
 CLOCK           
