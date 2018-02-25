@@ -156,11 +156,36 @@ BRRIP          13880125        1091681       184622169514
 CAR            10758844        1092788       148213735234
 
 
+=== Sqlite-5m-10r90w ===
+87323955 reads, 40556357 writes, 1468541 unique reads, 1468805 unique writes, 1468827 unique sectors.
+low sector 166772736, high sector 173418927.
+
+                   Read        Written               Time
+= 10k blocks =
+ARC             9514098        8691159     
+CLOCK           9483961        8576192    
+CLOCKPRO        9676427        8596752     
+2Q              9469002        8588565     
+LRU             9482378        8573839     
+R2             11265184        8667172    
+SPATIAL         9477041        8569309     
+RRIP            9483345        8562202   
+BRRIP           9474203        8550724    
+CAR             9482640        8578284    
 
 
 
 
+=== Sqlite-5m-66r33w ===
+86574084 reads, 15617024 writes, 1471234 unique reads, 1470528 unique writes, 1471363 unique sectors.
+low sector 166772736, high sector 173421463.
 
+
+
+
+=== Sqlite-5m-90r10w ===
+84264936 reads, 4913090 writes, 1472079 unique reads, 1392165 unique writes, 1472116 unique sectors.
+low sector 166772736, high sector 173422223.
 
 
 
