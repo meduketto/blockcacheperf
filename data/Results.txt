@@ -51,7 +51,18 @@ CAR              675611         181926         7045108056
 52310 reads, 14124 writes, 33020 unique reads, 10527 unique writes, 42107 unique sectors.
 low sector 76808, high sector 151284449.
 
-
+                   Read        Written               Time
+= 16 blocks =
+ARC                7217           1942            93951344
+CLOCK              7183           1948            92461965
+CLOCKPRO           7164           1949            96926214
+2Q                 7193           1974            94196184
+LRU                7221           1966            93944273
+R2                 7352           1979            98398602
+SPATIAL            7200           1972            96387707
+RRIP               7214           1954            94016581
+BRRIP              7277           1990            94556699
+CAR                7224           2000            93545293
 
 
 === Sqlite-NoAppCache-5m-10r90w ===
@@ -113,7 +124,6 @@ SPATIAL        12742142        3467963       216766018206
 RRIP           12469770        3465647       203180598460
 BRRIP          14419616        3461717       230309125559
 CAR            10748832        3469053       195259800208
-
 
 
 === Sqlite-NoAppCache-5m-90r10w ===
