@@ -198,26 +198,42 @@ CLOCKPRO        9678869        3401259       178280456344
 2Q              9466830        3370172       165067888968
 LRU             9478952        3389903       168182765053
 R2             11238355        3421023       202024761019
-SPATIAL         9471743        3392066
-RRIP            9475244        3372653
-BRRIP           9468380        3381504
-CAR             9480038        3401101
+SPATIAL         9471743        3392066       176305250803
+RRIP            9475244        3372653       169410921452
+BRRIP           9468380        3381504       178008332793
+CAR             9480038        3401101       181300380768
 
+= 2k blocks =
+ARC            12814173        3462407       
+CLOCK          13164549        3464528
+CLOCKPRO       13542387        3461983
+2Q              9905103        3440557
+LRU            13486978        3462868
+R2             15410358        3462806
+SPATIAL        13411545        3463034
+RRIP           12998507        3462209
+BRRIP          14242082        3459539
+CAR            11519113        3459256
 
 
 === Sqlite-5m-90r10w ===
 84264936 reads, 4913090 writes, 1472079 unique reads, 1392165 unique writes, 1472116 unique sectors.
 low sector 166772736, high sector 173422223.
 
-
-
-
-
-
-
-
                    Read        Written               Time
 = 10k blocks =
+ARC              
+CLOCK           
+CLOCKPRO         
+2Q               
+LRU             
+R2               
+SPATIAL         
+RRIP            
+BRRIP            
+CAR            
+
+= 2k blocks =
 ARC              
 CLOCK           
 CLOCKPRO         
