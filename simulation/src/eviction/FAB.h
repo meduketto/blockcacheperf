@@ -13,6 +13,11 @@
 
 class FlashBlock;
 
+struct FlashAddress {
+    int64_t blockNo;
+    int64_t pageNo;
+};
+
 class FAB: public EvictionAlgorithm {
 public:
     FAB();
@@ -22,7 +27,7 @@ public:
     virtual void evict();
 
 private:
-    int64_t getPhysicalByte(int64_t physicalBlock);
+    struct FlashAddress getFlashAddress(int64_t physicalBlock);
 
     Cache* cache_;
     std::list<FlashBlock*> blocks_;
