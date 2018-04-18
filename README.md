@@ -11,4 +11,5 @@ raw disk device to get a more realistic measure of their performance.
 algorithms are supported.
 
 This project is developed as part of my Master Thesis at Harvard University
-Extension School. You can read the paper from [here](https://github.com/meduketto/blockcacheperf/tree/master/doc).
+Extension School. You can read the paper from
+[here](https://github.com/meduketto/blockcacheperf/tree/master/doc/MasterThesis-Feb2018.pdf).
